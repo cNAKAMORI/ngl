@@ -2,7 +2,7 @@
 let str_list = []
 stage.compList.map((function(el) {
   if(el.visible){
-      strlist.push(el)
+      str_list.push(el)
   }
 }))
 if(str_list.length >= 2){
