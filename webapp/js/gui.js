@@ -418,6 +418,7 @@ NGL.MenubarWidget = function (stage, preferences) {
 
   container.add(new NGL.MenubarFileWidget(stage))
   container.add(new NGL.MenubarViewWidget(stage, preferences))
+  container.add(new NGL.MenubarSaveWidget(stage))
   if (NGL.repListUrl && NGL.repScriptUrl) {
     container.add(new NGL.MenubarRepresentationWidget(stage))
   }
@@ -670,6 +671,180 @@ NGL.MenubarViewWidget = function (stage, preferences) {
 
   return UI.MenubarHelper.createMenuContainer('View', optionsPanel)
 }
+
+
+NGL.MenubarSaveWidget = function (stage, preferences) {
+  // event handlers
+  function onSaveOptionClick () {
+    var orient = JSON.stringify(
+        stage.viewerControls.getOrientation().toArray(),
+        function (k, v) {
+          return v.toFixed ? Number(v.toFixed(2)) : v
+        }
+    )
+    
+    let structures = stage.compList.map(el => el.structure)     
+    let writers = structures.map(x => new NGL.PdbWriter(x))
+    let pdbs = writers.map(x => x.getString())
+    
+    let params = stage.compList.map(el => el.reprList.map(rp => rp.getParameters()))
+    let types = stage.compList.map(el => el.reprList.map(rp => rp.getType()))
+    let parent = stage.compList.map(el => el.reprList.map(rp => rp.parent.name))
+    
+    let selection = stage.compList.map(el => el.selection.string)
+    
+    var sp = stage.getParameters()
+    let json_data = {
+                            "pdbs": pdbs, 
+                            "orient":orient, 
+                            "stage_param":sp, 
+                            "selection":selection, 
+                            "repr":{"parent":parent, "param":params, "type":types}
+                           }
+    var json_text = JSON.stringify(json_data)
+    
+    let blob = new Blob([json_text], { type: 'application/json' })
+    
+    let fname = window.prompt('Save file name')
+    if (!fname.includes(".ngl")){
+      fname += ".ngl"
+    }
+    
+    NGL.download(blob, fname)
+  }
+  
+  var fileTypesOpen = NGL.flatten([
+    NGL.ParserRegistry.getStructureExtensions(),
+    NGL.ParserRegistry.getVolumeExtensions(),
+    NGL.ParserRegistry.getSurfaceExtensions(),
+    NGL.DecompressorRegistry.names,
+    NGL.ScriptExtensions
+  ]) 
+  
+  function fileInputOnChange (e) {
+    var fn = function (file, callback) {
+      let reader = new FileReader()
+      reader.onload = () => {
+        let json_data = JSON.parse(reader.result)
+        let ix = -1
+        json_data["pdbs"].find(member => {
+          let blob = new Blob([member], { type: 'text/plain' })
+          let fname = member.split("\n")[0].replace("TITLE ","").split(".pdb")[0] + ".pdb"
+          let file = new File([blob], fname, {lastModified: 0})
+          stage.loadFile(file).then(function (c) {    
+            let jx =0
+            json_data["repr"]["type"][ix].find(type => {
+              c.addRepresentation(type, json_data["repr"]["param"][ix][jx])
+              jx++
+            })
+            c.setSelection(json_data["selection"][ix])
+          })
+          ix++
+        })
+        stage.viewerControls.orient(JSON.parse(json_data["orient"]))
+        
+        Object.keys(json_data["stage_param"]).find(key => {
+          if (key==="backgroundColor"){
+            stage.parameters.backgroundColor=json_data["stage_param"][key]
+          }
+          
+          if (key==="sampleLevel"){
+            stage.parameters.sampleLevel=json_data["stage_param"][key]
+          }
+          
+          if (key==="rotateSpeed"){
+            stage.parameters.rotateSpeed=json_data["stage_param"][key]
+          }
+          
+          if (key==="zoomSpeed"){
+            stage.parameters.zoomSpeed=json_data["stage_param"][key]
+          }
+          
+          if (key==="panSpeed"){
+            stage.parameters.panSpeed=json_data["stage_param"][key]
+          }
+          
+          if (key==="clipNear"){
+            stage.parameters.clipNear=json_data["stage_param"][key]
+          }
+          
+          if (key==="clipFar"){
+            stage.parameters.clipFar=json_data["stage_param"][key]
+          }
+          
+          if (key==="clipDist"){
+            stage.parameters.clipDist=json_data["stage_param"][key]
+          }
+          
+          if (key==="fogNear"){
+            stage.parameters.fogNear=json_data["stage_param"][key]
+          }
+          
+          if (key==="fogFar"){
+            stage.parameters.fogFar=json_data["stage_param"][key]
+          }
+          
+          if (key==="cameraType"){
+            stage.parameters.cameraType=json_data["stage_param"][key]
+          }
+          
+          if (key==="cameraFov"){
+            stage.parameters.cameraFov=json_data["stage_param"][key]
+          }
+          
+          if (key==="lightColor"){
+            stage.parameters.lightColor=json_data["stage_param"][key]
+          }
+          
+          if (key==="lightIntensity"){
+            stage.parameters.lightIntensity=json_data["stage_param"][key]
+          }
+          
+          if (key==="ambientColor"){
+            stage.parameters.ambientColor=json_data["stage_param"][key]
+          }
+          
+          if (key==="ambientIntensity"){
+            stage.parameters.ambientIntensity=json_data["stage_param"][key]
+          }
+          
+          if (key==="hoverTimeout"){
+            stage.parameters.hoverTimeout=json_data["stage_param"][key]
+          }
+        })
+        stage.setParameters(stage.parameters)
+      }
+      reader.readAsText(file)
+    }
+    var queue = new NGL.Queue(fn, e.target.files)
+  }
+
+  var fileInput = document.createElement('input')
+  fileInput.type = 'file'
+  fileInput.multiple = true
+  fileInput.style.display = 'none'
+  fileInput.accept = '.ngl'
+  fileInput.addEventListener('change', fileInputOnChange, false)
+  
+  function onLoadOptionClick () {
+    fileInput.click()
+  }
+
+  // configure menu contents
+
+  var createOption = UI.MenubarHelper.createOption
+  var createDivider = UI.MenubarHelper.createDivider
+
+  var menuConfig = [
+    createOption('Save', onSaveOptionClick),
+    createOption('Load', onLoadOptionClick),
+  ]
+
+  var optionsPanel = UI.MenubarHelper.createOptionsPanel(menuConfig)
+
+  return UI.MenubarHelper.createMenuContainer('Save', optionsPanel)
+}
+
 
 NGL.MenubarRepresentationWidget = function (stage) {
   // configure menu contents
