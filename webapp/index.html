@@ -58,7 +58,106 @@
           })
         })
       }
+      
+      var file = NGL.getQuery("ngl")
+      if(file){
+        let request = new XMLHttpRequest();
+        request.open('GET', file, false);
+        request.send(null);
 
+        if (request.status == 200){
+          let data = request.responseText;
+          let json_data = JSON.parse(data)
+          let ix = -1
+          json_data["pdbs"].find(member => {
+            let blob = new Blob([member], { type: 'text/plain' })
+            let fname = member.split("\n")[0].replace("TITLE ","").split(".pdb")[0] + ".pdb"
+            let file = new File([blob], fname, {lastModified: 0})
+            stage.loadFile(file).then(function (c) {    
+              let jx =0
+              json_data["repr"]["type"][ix].find(type => {
+                c.addRepresentation(type, json_data["repr"]["param"][ix][jx])
+                jx++
+              })
+              c.setSelection(json_data["selection"][ix])
+            })
+            ix++
+          })
+          stage.viewerControls.orient(JSON.parse(json_data["orient"]))
+          
+          Object.keys(json_data["stage_param"]).find(key => {
+            if (key==="backgroundColor"){
+              stage.parameters.backgroundColor=json_data["stage_param"][key]
+            }
+            
+            if (key==="sampleLevel"){
+              stage.parameters.sampleLevel=json_data["stage_param"][key]
+            }
+            
+            if (key==="rotateSpeed"){
+              stage.parameters.rotateSpeed=json_data["stage_param"][key]
+            }
+            
+            if (key==="zoomSpeed"){
+              stage.parameters.zoomSpeed=json_data["stage_param"][key]
+            }
+            
+            if (key==="panSpeed"){
+              stage.parameters.panSpeed=json_data["stage_param"][key]
+            }
+            
+            if (key==="clipNear"){
+              stage.parameters.clipNear=json_data["stage_param"][key]
+            }
+            
+            if (key==="clipFar"){
+              stage.parameters.clipFar=json_data["stage_param"][key]
+            }
+            
+            if (key==="clipDist"){
+              stage.parameters.clipDist=json_data["stage_param"][key]
+            }
+            
+            if (key==="fogNear"){
+              stage.parameters.fogNear=json_data["stage_param"][key]
+            }
+            
+            if (key==="fogFar"){
+              stage.parameters.fogFar=json_data["stage_param"][key]
+            }
+            
+            if (key==="cameraType"){
+              stage.parameters.cameraType=json_data["stage_param"][key]
+            }
+            
+            if (key==="cameraFov"){
+              stage.parameters.cameraFov=json_data["stage_param"][key]
+            }
+            
+            if (key==="lightColor"){
+              stage.parameters.lightColor=json_data["stage_param"][key]
+            }
+            
+            if (key==="lightIntensity"){
+              stage.parameters.lightIntensity=json_data["stage_param"][key]
+            }
+            
+            if (key==="ambientColor"){
+              stage.parameters.ambientColor=json_data["stage_param"][key]
+            }
+            
+            if (key==="ambientIntensity"){
+              stage.parameters.ambientIntensity=json_data["stage_param"][key]
+            }
+            
+            if (key==="hoverTimeout"){
+              stage.parameters.hoverTimeout=json_data["stage_param"][key]
+            }
+          })
+          stage.setParameters(stage.parameters)
+        }
+      }
+      
       var struc = NGL.getQuery("struc")
       var traj = NGL.getQuery("traj")
       if (struc) {
