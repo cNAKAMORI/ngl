@@ -44,64 +44,20 @@
     document.addEventListener("DOMContentLoaded", function () {
       stage = new NGL.Stage()
       NGL.StageWidget(stage)
-      let query = window.location.search.slice(1)
-      let dq = {}
-      if (query) {
-        query.split("&").forEach(function(q) {
-          let qa = q.split("=")
-          dq[qa[0]] = qa[1]
-        })
-      }
-      
-      if(dq["file"]){
-        stage.loadFile(dq["file"],{defaultRepresentation: true}).then(function (c) {
-          if(dq["repr"]=="alphafold"){
-            c.setSelection('')
-            c.removeAllRepresentations()
-            c.addRepresentation('cartoon', {
-              colorDomain: [0, 49.999, 50, 69.999, 70, 89.999, 90, 100],
-              colorScale: ['#ff7d45', '#ff7d45', '#ffdb13', '#ffdb13', '#65cbf3', '#65cbf3', '#0053d6', '#0053d6'],
-              colorScheme: 'bfactor'})
-          }else if(dq["repr"]=="docking"){
-            c.removeAllRepresentations()
-            c.setSelection('/0 /1')
-            c.addRepresentation("cartoon" , { colorScheme: "chainindex"})
-            c.addRepresentation("spacefill", { sele: "ion"})
-            c.addRepresentation("ball+stick" , { sele: "not (protein or nucleic or water) and not apolarh", 
-            								  multipleBond: "symmetric"})
-            c.addRepresentation("line" , { sele: "(protein or nucleic) and not apolarh",
-            						       linewidth: 0.75})
-            c.addRepresentation("contact"  , { masterModelIndex: 0, 
-            							       weakHydrogenBond: true, 
-            							       maxHbondDonPlaneAngle: 35,
-            							       sele: "not water"})
-          }else if(dq["repr"]=="surface"){
-            c.removeAllRepresentations()
-            c.setSelection('/0 /1')
-            c.addRepresentation("cartoon" , { colorScheme: "chainindex"})
-            c.addRepresentation("spacefill", { sele: "ion"})
-            c.addRepresentation("ball+stick" , { sele: "not (protein or nucleic or water) and not apolarh", 
-            								  multipleBond: "symmetric"})
-            c.addRepresentation("line" , { sele: "(protein or nucleic) and not apolarh",
-            						        linewidth: 0.75})
-            c.addRepresentation("contact"  , { masterModelIndex: 0, 
-            							       weakHydrogenBond: true, 
-            							       maxHbondDonPlaneAngle: 35,
-            							       sele: "not water"})
-            c.addRepresentation("surface"  , { sele: "(protein or nucleic or ACE or NME) and not HET",
-            							       opaqueBack: false,
-            							       opacity: 0.67,
-            							       color: "hydrophobicity",
-            							       surfaceType: "av"})
-          }
-        })
-      }
       
       var load = NGL.getQuery("load")
-      if (load) stage.loadFile(load, {defaultRepresentation: true})
-
       var script = NGL.getQuery("script")
-      if (script) stage.loadScript("./scripts/" + script + ".js")
+      if (load){
+        load.split(",").forEach(function(x){
+          stage.loadFile(x, {defaultRepresentation: true}).then(function(o){
+            if (script){
+              script.split(",").forEach(function(y){
+                stage.loadScript("./scripts/" + y + ".js")
+              })
+            }
+          })
+        })
+      }
 
       var struc = NGL.getQuery("struc")
       var traj = NGL.getQuery("traj")
