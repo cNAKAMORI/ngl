@@ -20,3 +20,5 @@ if(str_list.length >= 2){
   }
   var el = stage.addComponentFromObject(cs)
 }
+
+stage.loadScript("./scripts/representation/docking.js")
