@@ -12,7 +12,7 @@ This web app is designed for cheminformatics purposes, such as for pharmaceutica
 All function and representations apply to the visible structures only. 
 
 ## query
-load: some url addresses of web file
+load: some url addresses of web file <br>
 script: some function or representation files of scripts floder
 
 exapmle: http://localhost/ngl/webapp?load=http://localhost/rank1.pdb,http://localhost//rank2.pdb&script=representation/alphafold,function/alignment
