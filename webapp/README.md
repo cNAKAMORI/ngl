@@ -6,7 +6,7 @@ This web app is designed for cheminformatics purposes, such as for pharmaceutica
 3. Download this webapp folder
 4. Edit the path in index.html to your build path. See below. <br>
    line 14 <script src="../build/js/ngl.dev.js"></script>
-5. Run apache or nginx
+5. Run by apache or nginx
 
 ## functions and representations
 All function and representations apply to the visible structures only. 
