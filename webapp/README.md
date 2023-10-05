@@ -4,7 +4,7 @@ This web app is designed for cheminformatics purposes, such as for pharmaceutica
 1. Git clone from original source (https://github.com/nglviewer/ngl)
 2. Install and build from the clone
 3. Download this webapp folder
-4. Edit the path in index.html to your build path. See below.
+4. Edit the path in index.html to your build path. See below. <br>
    line 14 <script src="../build/js/ngl.dev.js"></script>
 5. Run apache or nginx
 
