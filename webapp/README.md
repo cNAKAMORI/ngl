@@ -4,5 +4,15 @@ This web app is designed for cheminformatics purposes, such as for pharmaceutica
 1. Git clone from original source (https://github.com/nglviewer/ngl)
 2. Install and build from the clone
 3. Download this webapp folder
-4. Edit the path of build script to the path of build folder
-    
+4. Edit the path of index.html to your build path. See below.
+   line 14 <script src="../build/js/ngl.dev.js"></script>
+5. Run apache or nginx
+
+## functions and representations
+All function and representations apply to the visible structures only. 
+
+## query
+load: some url addresses of web file
+script: some function or representation files of scripts floder
+
+exapmle: http://localhost/ngl/webapp?load=http://localhost/rank1.pdb,http://localhost//rank2.pdb&script=representation/alphafold,function/alignment
