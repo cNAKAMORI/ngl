@@ -1,0 +1,1 @@
+This web app is designed for cheminformatics purposes, such as for pharmaceutical companies. It mainly provides functions to display docking simulation results, alphafold results, 3D alignment and concatenation of proteins. It also has a feature to save and restore the whole view, so you can share what you are seeing with your colleagues.
